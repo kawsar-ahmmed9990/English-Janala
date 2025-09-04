@@ -4,7 +4,11 @@ const createElement = (arr) => {
   );
   return elementHtml.join(" ");
 };
-
+function pronounceWord(word) {
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = "en-EN"; // English
+  window.speechSynthesis.speak(utterance);
+}
 const spinnerManage = (status) => {
   if (status == true) {
     document.getElementById("spinner").classList.remove("hidden");
@@ -123,7 +127,9 @@ const displayLevelWords = (data) => {
             element.id
           })" class="bg-[#1a91ff1a] p-2 rounded-lg">
           <i class="fa-solid fa-circle-info "></i></div>
-          <div class="bg-[#1a91ff1a] p-2 rounded-lg">
+          <div onclick="pronounceWord('${
+            element.word
+          }')" class="bg-[#1a91ff1a] p-2 rounded-lg">
          <i class="fa-solid fa-volume-high"></i></div>
           
         </div></div>`;
@@ -152,3 +158,24 @@ const displayLessons = (lessons) => {
   }
 };
 loadLessons();
+
+document.getElementById("search-btn").addEventListener("click", (e) => {
+  removeActive();
+
+  const input = document.getElementById("input-btn");
+  const searchValue = input.value.trim().toLowerCase();
+  // console.log(searchValue);
+
+  // console.log(input);
+  fetch("https://openapi.programming-hero.com/api/words/all")
+    .then((responsive) => responsive.json())
+    .then((json) => {
+      const allWords = json.data;
+      // console.log(allWords);
+      const filterWord = allWords.filter((word) =>
+        word.word.toLowerCase().includes(searchValue)
+      );
+      displayLevelWords(filterWord);
+      document.getElementById("input-btn").value = "";
+    });
+});
